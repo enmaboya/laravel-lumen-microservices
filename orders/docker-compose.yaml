@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+  orders_service:
+    build: .
+    environment:
+      - APACHE_RUN_SERVE=www_data
+    volumes:
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    ports:
+      - 8100:80
+    working_dir: ${APP_PATH_CONTAINER}
+    networks:
+      net:
+        ipv4_address: 192.168.5.100
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+        MYSQL_DATABASE: ${DB_DATABASE}
+        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+        MYSQL_USER: ${DB_USERNAME}
+    volumes:
+        - ./.docker/mysql/dbdata:/var/lib/mysql
+    networks:
+      - net
+
+  composer:
+    image: composer
+    volumes:
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    working_dir: ${APP_PATH_CONTAINER}
+    command: composer install
+    networks:
+      - net
+
+networks:
+  net:
+    external: true
+    name: api-gateway_net

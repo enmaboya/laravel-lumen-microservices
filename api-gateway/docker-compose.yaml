@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+  api_gateway:
+    build: .
+    environment:
+      - APACHE_RUN_SERVE=www_data
+    volumes:
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    ports:
+      - 8080:80
+    working_dir: ${APP_PATH_CONTAINER}
+    networks:
+      net:
+        ipv4_address: 192.168.5.99
+
+  composer:
+    image: composer
+    volumes:
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    working_dir: ${APP_PATH_CONTAINER}
+    command: composer install
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.5.0/24
